@@ -18,7 +18,7 @@ sendToAll写了一个群发的，服务端启动，客户端连接之后，群�
 
 后续想讨论一下关于Handler类中的setIdleTime语句。设置空闲时间，比如两秒（注意读空闲、写空闲、读写空闲区别），那么每两秒都会触发一个sessionIdle事件。
 但是在KeepAliveFilter和Myhandler中都有对应的sessionIdle事件。
-心跳检测会触发KeepAliveFilter中的sessionIdle事件，并不会触发Handler中的sessionIdle事件，如果希望同时触发Handler中的sessionIdle事件，需要在spring中对心跳滤波器加上：
+心跳检测会触发KeepAliveFilter中的sessionIdle事件，并不会触发Handler中的sessionIdle事件，如果希望同时触发Handler中的sessionIdle事件，需要在spring中对心跳过滤器加上：
 <property name="forwardEvent" value="true" />
-即可以让相同的事件往下一个滤波器传递。
+即可以让相同的事件往下一个过滤器传递。
 
