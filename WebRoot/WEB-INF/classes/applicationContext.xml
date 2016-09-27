@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+	<bean class="org.springframework.beans.factory.config.CustomEditorConfigurer">
+		<property name="customEditors">
+			<map>
+				<entry key="java.net.SocketAddress"
+					value="org.apache.mina.integration.beans.InetSocketAddressEditor">
+				</entry>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="ioAcceptor" class="org.apache.mina.transport.socket.nio.NioSocketAcceptor"
+		init-method="bind" destroy-method="unbind">
+		<property name="defaultLocalAddress" value=":8888" />
+		<property name="handler" ref="serverHandler" />
+		<property name="filterChainBuilder" ref="filterChainBuilder" />
+		<property name="reuseAddress" value="true" />
+	</bean>
+	
+	<bean id="filterChainBuilder"
+		class="org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder">
+		<property name="filters">
+			<map>
+				<entry key="executor" value-ref="executorFilter" />
+				<entry key="mdcInjectionFilter" value-ref="mdcInjectionFilter" />
+				<entry key="codecFilter" value-ref="codecFilter" />
+				<entry key="loggingFilter" value-ref="loggingFilter" />
+<!--		心跳filter		-->
+				<entry key="keepAliveFilter" value-ref="keepAliveFilter" />
+			</map>
+		</property>
+	</bean>
+
+
+ <!-- executorFilter多线程处理 -->  
+	<bean id="executorFilter" class="org.apache.mina.filter.executor.ExecutorFilter" />
+	<bean id="mdcInjectionFilter" class="org.apache.mina.filter.logging.MdcInjectionFilter">
+		<constructor-arg value="remoteAddress" />
+	</bean>
+	<bean id="loggingFilter" class="org.apache.mina.filter.logging.LoggingFilter" />
+	
+	<bean id="codecFilter" class="org.apache.mina.filter.codec.ProtocolCodecFilter">
+		<constructor-arg>
+		<!-- <bean class="org.apache.mina.filter.codec.textline.TextLineCodecFactory" />-->  
+        <!-- 处理对象流时候用ObjectSerializationCodecFactory -->  
+        <!-- <bean class="org.apache.mina.filter.codec.serialization.ObjectSerializationCodecFactory" /> -->  
+			<!--
+				<bean
+				class="org.apache.mina.filter.codec.textline.TextLineCodecFactory"
+				/>
+			-->
+			<bean class="com.he.server.MyCodeFactory"></bean>
+<!--			<bean class="com.he.server.websocket.WebSocketCodecFactory"></bean>-->
+		</constructor-arg>
+	</bean>
+	
+<!--	心跳检测-->
+	<bean id="keepAliveFilter" class="org.apache.mina.filter.keepalive.KeepAliveFilter">
+		<constructor-arg>
+			<bean class="com.he.server.MyKeepAliveMessageFactory"></bean>
+		</constructor-arg>
+		 <constructor-arg type = "org.apache.mina.core.session.IdleStatus" value="BOTH_IDLE" >
+            
+        </constructor-arg>
+<!--心跳频率，默认60s	-->
+		<property name="requestInterval" value="5" />
+<!--心跳超时时间，默认30s	-->
+		<property name="requestTimeout" value="10" />
+		
+		<property name="forwardEvent" value="true" />
+	</bean>
+	
+	
+	<bean id="serverHandler" class="com.he.server.MyHandler" />
+<!--	boss server  -->
+<!--	<bean id="bossSampleHandler" class="cn.org.handler.HandlerOne" />-->
+
+</beans>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-module
+  type="WEB"
+  name="minaSpringTest"
+  id="myeclipse.1466474584156"
+  context-root="/MinaSpring"
+  j2ee-spec="5.0"
+  archive="minaSpringTest.war">
+  <attributes>
+    <attribute name="webrootdir" value="WebRoot" />
+  </attributes>
+</project-module>
+
